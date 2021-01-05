@@ -1,0 +1,40 @@
+{
+  "name": "heylows-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Crystal-Technologies-Ltd/heylows-server.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Crystal-Technologies-Ltd/heylows-server/issues"
+  },
+  "homepage": "https://github.com/Crystal-Technologies-Ltd/heylows-server#readme",
+  "dependencies": {
+    "bcrypt": "^5.0.0",
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "express-fileupload": "^1.2.0",
+    "firebase": "^8.1.1",
+    "firebase-admin": "^9.4.1",
+    "geo-distance": "^0.2.0",
+    "jsonwebtoken": "^8.5.1",
+    "lodash": "^4.17.20",
+    "moment": "^2.29.1",
+    "nodemailer": "^6.4.17",
+    "passport": "^0.4.1",
+    "passport-facebook": "^3.0.0",
+    "passport-google-oauth": "^2.0.0",
+    "pg": "^8.4.1",
+    "query-string": "^6.13.7",
+    "socket.io": "^2.3.0",
+    "uuidv4": "^6.2.4"
+  }
+}
