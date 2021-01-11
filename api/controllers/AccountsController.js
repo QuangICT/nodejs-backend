@@ -48,7 +48,7 @@ module.exports = {
     async getByID(req, res) {
         try {
             let sql = 'SELECT id, email, first_name, last_name, avatar, badges FROM accounts WHERE id = $1';
-            db.query(sql, [req.params.accountID], (err, response) => {
+            db.query(sql, [req.query.accountID], (err, response) => {
                 if (err) {
                     return res.status(400).send({
                         msg: err
@@ -188,7 +188,7 @@ module.exports = {
     async delete(req, res) {
         try {
             let sql = 'DELETE FROM accounts WHERE id = $1';
-            await db.query(sql, [req.params.accountID], (err, response) => {
+            await db.query(sql, [req.query.accountID], (err, response) => {
                 if (err) throw err;
                 res.json({message: 'Delete Successfully!'})
             })
@@ -220,8 +220,8 @@ module.exports = {
                                 });
                             } else {
                                 const queryRegister = {
-                                    text: 'INSERT INTO accounts(id, email, password, provider) VALUES($1, $2, $3, $4)',
-                                    values: [uuidv4(), req.body.email, hash, 'heylows']
+                                    text: 'INSERT INTO accounts(id, email, password, provider, avatar) VALUES($1, $2, $3, $4, $5)',
+                                    values: [uuidv4(), req.body.email, hash, 'heylows', 'ICO_DEFAULT_AVATAR_1']
                                 }
                                 db.query(queryRegister, (err, result) => {
                                         if (err) {
@@ -249,7 +249,7 @@ module.exports = {
 
     async login(req, res) {
         try {
-            await db.query(`SELECT * FROM accounts WHERE email = $1;`, [req.body.email],
+            await db.query(`SELECT * FROM accounts WHERE email = $1 AND provider = 'heylows';`, [req.body.email],
                 (err, result) => {
                     if (err) {
                         return res.status(400).send({
@@ -276,9 +276,7 @@ module.exports = {
                                         email: result.rows[0].email,
                                         userID: result.rows[0].id
                                     },
-                                    'SECRETKEY', {
-                                        expiresIn: '7d'
-                                    });
+                                    'SECRETKEY');
 
                                 db.query(`UPDATE accounts SET provider = 'heylows' WHERE id = '${result.rows[0].id}'`)
 
@@ -328,7 +326,7 @@ module.exports = {
                     }
                 })
 
-                let link = 'http://' + req.headers.host + '/api/accounts/reset/' + resetPasswordToken
+                let link = 'http://' + req.headers.host + '/api/accounts/reset?resetToken=' + resetPasswordToken
                 var username
                 if (response.rows[0].first_name !== null) {
                     username = response.rows[0].first_name + ' ' + response.rows[0].last_name
@@ -365,7 +363,7 @@ module.exports = {
 
     async reset(req, res) {
         try {
-            await db.query('SELECT * FROM accounts WHERE reset_password_token = $1', [req.params.resetToken], (err, response) => {
+            await db.query('SELECT * FROM accounts WHERE reset_password_token = $1', [req.query.resetToken], (err, response) => {
                 if (err) {
                     return res.status(400).send({
                         msg: err
@@ -378,7 +376,7 @@ module.exports = {
                 } else {
                     if (Date.now() > response.rows[0].reset_password_expires) {
                         db.query('UPDATE accounts SET reset_password_token = $1, reset_password_expires = $2 WHERE reset_password_token = $3',
-                            [null, null, req.params.resetToken])
+                            [null, null, req.query.resetToken])
                         return res.status(401).send({
                             message: 'Password reset token has expired.'
                         })
@@ -397,7 +395,7 @@ module.exports = {
     },
 
     async resetPassword(req, res) {
-        await db.query('SELECT * FROM accounts WHERE reset_password_token = $1', [req.params.resetToken], (err, response) => {
+        await db.query('SELECT * FROM accounts WHERE reset_password_token = $1', [req.query.resetToken], (err, response) => {
             if (err) {
                 return res.status(400).send({
                     msg: err
@@ -431,7 +429,7 @@ module.exports = {
                     });
                 } else {
                     db.query('UPDATE accounts SET password = $1, reset_password_token = $2, reset_password_expires = $3 WHERE reset_password_token = $4',
-                        [hash, null, null, req.params.resetToken], (err, result) => {
+                        [hash, null, null, req.query.resetToken], (err, result) => {
                             if (err) {
                                 return res.status(400).send({
                                     msg: err

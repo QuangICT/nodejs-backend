@@ -3,17 +3,23 @@ const db = require('../db');
 
 module.exports = {
     isLoggedIn: (req, res, next) => {
-        if (req.headers.authorization) {
-            const token = req.headers.authorization.split(' ')[1];
-            auth.verify(
-                token,
-                'SECRETKEY'
-            );
+        try {
+            if (req.headers.authorization) {
+                const token = req.headers.authorization.split(' ')[1];
+                auth.verify(
+                    token,
+                    'SECRETKEY'
+                );
 
-            next();
-        } else {
+                next();
+            } else {
+                return res.status(401).send({
+                    msg: 'Your session is invalid!'
+                })
+            }
+        } catch (err) {
             return res.status(401).send({
-                msg: 'Your session is invalid!'
+                msg: 'Your token is invalid!'
             })
         }
     },

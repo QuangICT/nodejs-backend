@@ -74,7 +74,7 @@ module.exports = {
         try {
             const token = req.headers.authorization.split(' ')[1];
             const user = await getUser(token);
-            db.query('SELECT topic, user_id, user_list FROM topics WHERE id = $1', [req.params.topicID], async (err, resTopic) => {
+            db.query('SELECT topic, user_id, user_list FROM topics WHERE id = $1', [req.query.topicID], async (err, resTopic) => {
                 if (err) {
                     return res.status(400).send({
                         msg: err
@@ -86,11 +86,25 @@ module.exports = {
                     userList.push(user.id)
                 }
 
-                await db.query(`UPDATE topics SET user_list = '{${userList.join()}}' WHERE id = $1`, [req.params.topicID]);
+                await db.query(`UPDATE topics SET user_list = '{${userList.join()}}' WHERE id = $1`, [req.query.topicID]);
                 let conversations = [];
-                await dbFirebase.ref(`${req.params.topicID}`).once("value", snapshot => {
-                    conversations.push(snapshot.val())
+                await dbFirebase.ref(`${req.query.topicID}`).once("value", snapshot => {
+                    snapshot.forEach(snap => {
+                        conversations.push(snap.val())
+                    })
                 });
+
+                for (const el of conversations) {
+                    const userAvatar = await new Promise((resolve, reject) => {
+                        db.query(`SELECT avatar FROM accounts WHERE id = '${el.uid}'`).then(r => {
+                            resolve(r)
+                        }, err => {
+                            reject(err)
+                        })
+                    })
+                    el.userAvatar = userAvatar.rows[0].avatar
+                }
+
                 res.status(200).send({
                     topic: resTopic.rows[0].topic,
                     conversations: conversations
@@ -110,8 +124,9 @@ module.exports = {
             const user = await getUser(token);
 
             let conversations = [];
-            await dbFirebase.ref(`${req.params.topicID}`).once("value", async snapshot => {
+            await dbFirebase.ref(`${req.query.topicID}`).once("value", async snapshot => {
                 await conversations.push(snapshot.val())
+                console.log(conversations)
 
                 var updateObject = {};
                 var emojis = []
@@ -137,11 +152,11 @@ module.exports = {
                 }
 
                 updateObject[`${req.body.messageID}/emojis`] = emojis
-                dbFirebase.ref(`${req.params.topicID}`).update(
+                dbFirebase.ref(`${req.query.topicID}`).update(
                     updateObject
                 )
                 var postUpdateConversations = []
-                await dbFirebase.ref(`${req.params.topicID}`).once("value", snapshot => {
+                await dbFirebase.ref(`${req.query.topicID}`).once("value", snapshot => {
                     postUpdateConversations.push(snapshot.val())
                 })
                 var sum = 0;
@@ -159,7 +174,7 @@ module.exports = {
 
                 var averageRating = Math.round(sum / length)
 
-                await db.query(`UPDATE topics SET rating = '${averageRating}' WHERE id = '${req.params.topicID}'`)
+                await db.query(`UPDATE topics SET rating = '${averageRating}' WHERE id = '${req.query.topicID}'`)
 
                 res.status(200).send({
                     msg: "Sent!"

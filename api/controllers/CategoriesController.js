@@ -27,7 +27,7 @@ module.exports = {
     async get(req, res) {
         try {
             let sql = 'SELECT * FROM categories WHERE id = $1';
-            await db.query(sql, [req.params.categoryID], (err, response) => {
+            await db.query(sql, [req.query.categoryID], (err, response) => {
                 if (err) {
                     return res.status(400).send({
                         msg: err

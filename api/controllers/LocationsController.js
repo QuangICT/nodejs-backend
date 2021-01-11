@@ -48,7 +48,7 @@ module.exports = {
         try {
             let sql = 'SELECT * FROM locations WHERE id = $1';
             let data = req.body;
-            await db.query(sql, [req.params.locationID], (err, response) => {
+            await db.query(sql, [req.query.locationID], (err, response) => {
                 if (err) {
                     return res.status(400).send({
                         msg: err
@@ -80,7 +80,7 @@ module.exports = {
     async delete(req, res) {
         try {
             let sql = 'DELETE FROM locations WHERE id = $1';
-            await db.query(sql, [req.params.locationID], (err, response) => {
+            await db.query(sql, [req.query.locationID], (err, response) => {
                 if (err) throw err;
                 res.json({ message: 'Delete Successfully!' })
             })

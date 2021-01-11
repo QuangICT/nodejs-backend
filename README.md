@@ -1,3 +1,11 @@
-# nodejs-backend
+# TODO
+- [ ] **Setup db migration pipeline**
+- [ ] **Setup socket**
+- [x] Setup project structure
+- [x] **deployment pipeline**
+- [ ] Heroku
+- [ ] **database design**
+- [x] Setup postman
+- [ ] 
 
-APIs with nodejs example
+---
